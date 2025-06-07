@@ -5,6 +5,10 @@ on:
     tags:
       - 'v*'  # v1.0.0 등 tag push 시 실행
   workflow_dispatch:
+    inputs:
+      tag:
+        description: '릴리스할 태그 (예: v1.0.0)'
+        required: true
 
 jobs:
   build:
@@ -51,6 +55,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*.tar.gz
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
