@@ -1,0 +1,55 @@
+name: Go Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # v1.0.0 등 tag push 시 실행
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        goos: [linux, darwin, windows]
+        goarch: [amd64, arm64]
+        exclude:
+          - goos: darwin
+            goarch: arm64  # macOS ARM은 선택사항
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Build
+        run: |
+          mkdir -p dist
+          output_name="ip-notifier-${{ matrix.goos }}-${{ matrix.goarch }}"
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            output_name="${output_name}.exe"
+          fi
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/$output_name main.go
+
+      - name: Archive binaries
+        run: |
+          cd dist
+          for f in *; do
+            if [[ "$f" == *.exe ]]; then
+              zip "${f%.exe}.zip" "$f"
+            else
+              tar -czvf "$f.tar.gz" "$f"
+            fi
+          done
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
