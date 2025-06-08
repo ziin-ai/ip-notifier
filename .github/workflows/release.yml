@@ -36,12 +36,11 @@ jobs:
         run: |
           mkdir -p dist
           output_name="ip-notifier-${{ matrix.goos }}-${{ matrix.goarch }}"
-          if [ "${{ matrix.goarch }}" = "arm" ]; then
-            output_name="${output_name}-v${{ matrix.goarm }}"
-          fi
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
-          ${ matrix.goarm && format('GOARM={0}', matrix.goarm) } \
-          go build -o dist/$output_name main.go
+	  if [ "${{ matrix.goarch }}" = "arm" ]; then
+	    export GOARM=${{ matrix.goarm }}
+	    output_name="${output_name}-v${{ matrix.goarm }}"
+	  fi
+	  GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/$output_name main.go
 
       - name: Archive binaries
         run: |
