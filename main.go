@@ -5,19 +5,18 @@ import (
     "encoding/json"
     "fmt"
     "net"
-    "os"
     "net/http"
+    "os"
 )
 
-
-func getWlanIP() (string, error) {
+func getIPByInterface(ifaceName string) (string, error) {
     interfaces, err := net.Interfaces()
     if err != nil {
         return "", err
     }
 
     for _, iface := range interfaces {
-        if iface.Name == "wlan0" && iface.Flags&net.FlagUp != 0 {
+        if iface.Name == ifaceName && iface.Flags&net.FlagUp != 0 {
             addrs, err := iface.Addrs()
             if err != nil {
                 return "", err
@@ -32,12 +31,12 @@ func getWlanIP() (string, error) {
         }
     }
 
-    return "", fmt.Errorf("wlan0 IP not found")
+    return "", fmt.Errorf("%s IP not found", ifaceName)
 }
 
-func sendToDiscord(webhookURL string, ip string) error {
+func sendToDiscord(webhookURL string, hostname string, ifaceName string, ip string) error {
     payload := map[string]string{
-        "content": fmt.Sprintf("📡 Jetson Nano wlan0 IP: `%s`", ip),
+        "content": fmt.Sprintf("📡 `%s` `%s` IP: `%s`", hostname, ifaceName, ip),
     }
 
     body, _ := json.Marshal(payload)
@@ -50,18 +49,29 @@ func sendToDiscord(webhookURL string, ip string) error {
 }
 
 func main() {
+    ifaceName := "wlan0"
+    if len(os.Args) > 1 {
+        ifaceName = os.Args[1]
+    }
+
     webhookURL := os.Getenv("DISCORD_WEBHOOK")
-    ip, err := getWlanIP()
-    if err != nil {
-        fmt.Println("failed to fetch IP:", err)
+    if webhookURL == "" {
+        fmt.Println("DISCORD_WEBHOOK environment not found")
         return
     }
 
-    if err := sendToDiscord(webhookURL, ip); err != nil {
+    hostname, _ := os.Hostname()
+    ip, err := getIPByInterface(ifaceName)
+    if err != nil {
+        fmt.Printf("failed to fetch IP for %s: %v\n", ifaceName, err)
+        return
+    }
+
+    if err := sendToDiscord(webhookURL, hostname, ifaceName, ip); err != nil {
         fmt.Println("failed to send discord:", err)
         return
     }
 
-    fmt.Println("succeed send to Discord")
+    fmt.Println("✅ succeed send to Discord")
 }
 

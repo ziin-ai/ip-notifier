@@ -18,10 +18,11 @@ jobs:
     strategy:
       matrix:
         goos: [linux]
-        goarch: [amd64, arm64]
-        exclude:
-          - goos: darwin
-            goarch: arm64  # macOS ARM은 선택사항
+        include:
+          - goarch: amd64
+          - goarch: arm64
+          - goarch: arm
+            goarm: 7
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,20 +36,18 @@ jobs:
         run: |
           mkdir -p dist
           output_name="ip-notifier-${{ matrix.goos }}-${{ matrix.goarch }}"
-          if [ "${{ matrix.goos }}" = "windows" ]; then
-            output_name="${output_name}.exe"
+          if [ "${{ matrix.goarch }}" = "arm" ]; then
+            output_name="${output_name}-v${{ matrix.goarm }}"
           fi
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/$output_name main.go
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} \
+          ${ matrix.goarm && format('GOARM={0}', matrix.goarm) } \
+          go build -o dist/$output_name main.go
 
       - name: Archive binaries
         run: |
           cd dist
           for f in *; do
-            if [[ "$f" == *.exe ]]; then
-              zip "${f%.exe}.zip" "$f"
-            else
-              tar -czvf "$f.tar.gz" "$f"
-            fi
+            tar -czvf "$f.tar.gz" "$f"
           done
 
       - name: Upload to GitHub Release
