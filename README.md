@@ -10,13 +10,19 @@ Perfect for headless Jetson Nano, Raspberry Pi, or any Linux server.
 ▶️ For **x86_64 (amd64)** systems:
 
 ```bash
-wget -qO- https://github.com/ziin-ai/ip-notifier/releases/download/v0.0.2/ip-notifier-linux-amd64.tar.gz | tar -xz && sudo mv ip-notifier-linux-amd64 /usr/local/bin/ip-notifier && sudo chmod +x /usr/local/bin/ip-notifier
+wget -qO- https://github.com/ziin-ai/ip-notifier/releases/download/v0.0.4/ip-notifier-linux-amd64.tar.gz | tar -xz && sudo mv ip-notifier-linux-amd64 /usr/local/bin/ip-notifier && sudo chmod +x /usr/local/bin/ip-notifier
 ```
 
 ▶️ For ARM64 (Jetson Nano, Raspberry Pi 64-bit):
 ```
-wget -qO- https://github.com/ziin-ai/ip-notifier/releases/download/v0.0.2/ip-notifier-linux-arm64.tar.gz | tar -xz && sudo mv ip-notifier-linux-arm64 /usr/local/bin/ip-notifier && sudo chmod +x /usr/local/bin/ip-notifier
+wget -qO- https://github.com/ziin-ai/ip-notifier/releases/download/v0.0.4/ip-notifier-linux-arm64.tar.gz | tar -xz && sudo mv ip-notifier-linux-arm64 /usr/local/bin/ip-notifier && sudo chmod +x /usr/local/bin/ip-notifier
 ```
+
+▶️ For ARM32 (Raspberry Pi 32-bit):
+```
+wget -qO- https://github.com/ziin-ai/ip-notifier/releases/download/v0.0.4/ip-notifier-linux-arm-v7.tar.gz | tar -xz && sudo mv ip-notifier-linux-arm-v7 /usr/local/bin/ip-notifier && sudo chmod +x /usr/local/bin/ip-notifier
+```
+
 
 ## Setup at Linux
 
